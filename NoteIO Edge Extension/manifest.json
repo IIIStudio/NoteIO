@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "NoteIO Edge Extension",
+  "version": "1.0.0",
+  "action": {
+    "default_title": "NoteIO"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "tabs",
+    "webRequest",
+    "webRequestBlocking"
+  ],
+  "host_permissions": [
+    "https://dav.jianguoyun.com/*"
+  ]
+}
