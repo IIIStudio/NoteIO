@@ -1,10 +1,10 @@
-
-
 <!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="./notes.png" type="image/x-icon">
+    <link rel="shortcut icon" href="./notes.png" type="image/x-icon">
     <title>在线本地剪贴笔记本 - NoteIO</title>
     <style>
         body {
@@ -627,27 +627,36 @@ document.addEventListener('DOMContentLoaded', function() {
     const fileInput = document.getElementById('fileInput');
     const statusToast = document.getElementById('statusToast');
 
-
-
-
-
-
-
-
     // 读取环境变量中的 clientId/redirectUri
     fetch('/api/dropbox-env').then(r => r.json()).then(env => {
         if (env && env.clientId) DROPBOX_CONFIG.clientId = env.clientId;
         if (env && env.redirectUri) DROPBOX_CONFIG.redirectUri = env.redirectUri;
     }).catch(() => {});
-
-
+    // 监听弹窗回传的 OAuth code
+    window.addEventListener('message', function(e) {
+        try {
+            if (e.origin !== window.location.origin) return;
+            const data = e.data;
+            if (data && data.type === 'DROPBOX_OAUTH_CODE' && data.code) {
+                handleOAuthCallback(String(data.code));
+            }
+        } catch (_) {}
+    });
 
     // 首先检查URL中是否有授权码
     const urlParams = new URLSearchParams(window.location.search);
     const authCode = urlParams.get('code');
     
     if (authCode) {
-        handleOAuthCallback(authCode);
+        // 如果在弹窗中，回传给父窗口并自动关闭；否则在本窗口处理
+        if (window.opener && window.opener !== window) {
+            try {
+                window.opener.postMessage({ type: 'DROPBOX_OAUTH_CODE', code: authCode }, window.location.origin);
+            } catch (_) {}
+            setTimeout(function() { window.close(); }, 100);
+        } else {
+            handleOAuthCallback(authCode);
+        }
     }
 
     // 加载数据
@@ -690,20 +699,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function showAuthModal() {}
 
     function hideAuthModal() {}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     // 加载数据时同时加载侧边栏状态
     function loadData() {
