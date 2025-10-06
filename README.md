@@ -8,6 +8,8 @@
 
 那么就可以用它。
 
+> **非常欢迎大家反馈**我自己使用场景已经住够了。
+
 ## 更新日志
 ### 2025年10月6日
 支持vercel安装 支持自动上传到dropbox。
@@ -31,6 +33,7 @@ files.content.write
 files.content.read
 ```
 如果还是出现问题请看这里：https://github.com/IIIStudio/NoteIO/issues/1
+
 ## 使用方式
 
 使用Ctrl+v粘贴内容，就这么简单
