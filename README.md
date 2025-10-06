@@ -11,7 +11,7 @@
 ## 更新日子
 ### 2025年10月6日
 支持vercel安装 支持自动上传。
-<p dir="auto"><a href="https://vercel.com/import/project?template=https://cnb.cool/IIIStudio/HTML/NoteIO/tree/main" rel="nofollow"><img src="https://camo.githubusercontent.com/20bea215d35a4e28f2c92ea5b657d006b087687486858a40de2922a4636301ab/68747470733a2f2f76657263656c2e636f6d2f627574746f6e" height="24" data-canonical-src="https://vercel.com/button" style="max-width: 100%; height: auto; max-height: 24px;"></a></p>
+<p dir="auto"><a href="https://vercel.com/import/project?template=https://github.com/IIIStudio/NoteIO/tree/master" rel="nofollow"><img src="https://camo.githubusercontent.com/20bea215d35a4e28f2c92ea5b657d006b087687486858a40de2922a4636301ab/68747470733a2f2f76657263656c2e636f6d2f627574746f6e" height="24" data-canonical-src="https://vercel.com/button" style="max-width: 100%; height: auto; max-height: 24px;"></a></p>
 
 Root Directory：**选择目录为vercel**
 
