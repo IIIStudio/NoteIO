@@ -1,8 +1,0 @@
-{
-  "version": 2,
-  "name": "noteio",
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/noteio.html" }
-  ]
-}
