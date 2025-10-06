@@ -30,6 +30,7 @@ Permissions 需要开放权限为 （勾选下面的，记得保存）
 files.content.write
 files.content.read
 ```
+如果还是出现问题请看这里：https://github.com/IIIStudio/NoteIO/issues/1
 ## 使用方式
 
 使用Ctrl+v粘贴内容，就这么简单
@@ -45,6 +46,7 @@ files.content.read
 1. 打开edge://extensions/
 2. 开启开发人员模式（在左边）
 3. 如果是压缩包直接拖入其中，如果是解压的，选择上方`加载解压缩的扩展`
+4. 坚果云需要先创建目录在同步。
 
 - 添加坚果云备份
 
