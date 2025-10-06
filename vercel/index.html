@@ -1,0 +1,1485 @@
+
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线本地剪贴笔记本 - NoteIO</title>
+    <style>
+        body {
+          color: #444;
+          font: 80% / 1.65 Verdana, "Geneva CE", lucida, 'Microsoft YaHei', sans-serif;
+          padding: 20px;
+          background: #f5f5f5;
+          display: flex;
+          margin: 0;
+            background-position: right center;
+            background-repeat: no-repeat;
+            background-size: auto 100vh;
+            display: flex;
+        }
+
+                /* 左侧页签栏 */
+        .sidebar {
+          background: #fff;
+          border-right: 1px solid #ddd;
+          padding: 10px;
+          max-height: 500px;
+          overflow-y: auto;
+          right: 20px;
+          top: 20px;
+          width: 250px;
+          max-height: 500px;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          padding: 10px;
+          box-shadow: 0 0.5em 1em -0.125em #090a0c1a, 0 0px 0 1px #090a0c05;
+          border-radius: 9px;
+          transition: all 0.3s ease;
+        }
+
+        .sidebar.hidden {
+          transform: translateX(-100%);
+          opacity: 0;
+          width: 0;
+          padding: 0;
+          border: none;
+        }
+
+        .page-tab {
+          padding: 8px 12px;
+          margin-bottom: 5px;
+          cursor: pointer;
+          border-radius: 4px;
+          background: #f0f0f0;
+          position: relative;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .page-tab.active {
+          background: #e0e0e0;
+          font-weight: bold;
+        }
+
+        .page-tab-name {
+          flex: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .page-tab-input {
+          flex: 1;
+          padding: 5px;
+          box-sizing: border-box;
+          border: 1px solid #ccc;
+          border-radius: 3px;
+          font-family: inherit;
+          font-size: inherit;
+          width: 100%;
+        }
+
+        .page-tab-delete {
+          margin-left: 8px;
+          color: #999;
+          font-size: 12px;
+          padding: 2px 5px;
+          border-radius: 3px;
+        }
+
+        .page-tab-delete:hover {
+          background: #ffcccc;
+          color: #ff0000;
+        }
+
+        .add-page {
+          padding: 8px 12px;
+          margin-top: 10px;
+          cursor: pointer;
+          color: #666;
+          text-align: center;
+          border: 1px dashed #ccc;
+          border-radius: 4px;
+        }
+
+        .add-page:hover {
+          background: #f0f0f0;
+        }
+
+                /* 右侧内容区 */
+        .wrapper {
+          flex: 1;
+          padding: 0 20px;
+          height: calc(100vh - 40px);
+          overflow-y: auto;
+          transition: margin-left 0.3s ease;
+        }
+                
+                /* 瀑布流布局 */
+        .aside {
+          min-height: 100px;
+          column-width: 278px;
+          column-gap: 15px;
+        }
+
+        .note {
+          padding-top: 38px;
+          position: relative;
+          background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARYAAAAmCAMAAAA2nkRkAAACW1BMVEX////j4+MAAADj4+MAAADj4+MAAADj4+MAAADj4+MAAADj4+OBgYHj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+PExMTj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pd3d3j4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+Pf39/j4+Pj4+Pj4+Pj4+Pj4+Pj4+Pj4+P////+/v79/f38/Pz7+/v6+vr5+fn4+Pj39/f29vb19fX09PTz8/Py8vLx8fHw8PDv7+/u7u7t7e3s7Ozr6+vq6urp6eno6Ojn5+fm5ubl5eXk5OTj4+Pf39/9/f329vb//ff//fb+/fb+/fX9/PX9/PT++/T8+/P/++r9+vL9+vH8+vH++un8+fH7+fD7+e/9+ej7+O/8+Oj8+Of69+769+379+f79+b59uz49uz69ub69uX49ev59eX59eT49Or39On39Oj49OT49OP38+j28+j28+f38+P38+L18ub28uL28uH18eX08eX08eT18eH18eD18OPy8Or18ODz8OLx7+n079/z7+Hz7+Dy7+Lz797z793x7+Dy7t/y7t3y7tzw7t7x7d3u7eTx7dzw7N3w7Nzw7Nvw7Nrv69vv69re2svZ1cbRzb/Py70cxmzUAAAAe3RSTlMAAAABAQICAwMEBAUFBwgKCwwODxEREhYXGh4fIyQlKCssLTEyNTY6Pj9CQ0RJTU5SVldbXF9hZGZmaWprbm9zdnd5ent8fX+AgoOFh4iLjI2Oj5CSk5SVlpeYmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmpqALU/hAAACKUlEQVR42u2Yz2sTURDHZ+b7NkmNmEJUcqi1VtCDvXjxqCAo+EerIHry5MWLiigVwf6y/ghJ3o/xEEwqYky7TtKHbw67vN1lmPnsd9/MLNOijP/+SKsSQFhEwGABCwtDABYHiMBhffLw02eGwbpFUWk2II6FBQwRhrCwiDgRdgDYibuspEqqquPTdDW9sP0Tsn9FuWK5Rx5OIAA2pkmS/pryZL19HO15ny2WD+1b/ROkPI+lte6BYeSwxLJz2FxJSVUNfH9/2c9VLZ2zA7MNXHctIxfT4nOlZ6XG9JGyxfL1PdQIeHqTL5bGpjPCop1etbxKVBNaaLSHySbu/tqnmsUtnbwScc13GoeNpo1edJXe1fQwUy1uliLkzzfDXBX6W7rDRrvLvqv1MaRZaklsOVkQkfQ/2/RbvaSme8sjSyoXtozc4/5jw7Dviq1YNq3EGHe62RZo6p75YuV6r5MtFnf1uZXr9qW9bLGE1zcfGLm+vXuY70e0/4KM6jOdb+WLhcy2lofNQcZYNsiouxj5jNVycf1fty0MV1XNlfa5t9eWNyrW7y6Gx+rRmEmEMf7zD0cVAwJUqWJyYAITJdUUlALni4V6R8arccoMjA9OAHaoEle/pUyBIkX1SUfkI2mkoInCnJPYacfSukFHCnTURJ6iTlJOI/Vp8SkvHcvgCWVqQsUKloKlYClYCpaCpWApWAqWguW/MHfK4+tcpxBi9MEPQ4gUFjRP/gCaEN+yI3PiHAAAAABJRU5ErkJggg==) top center no-repeat;
+          transition: all 0.3s ease;
+          width: 278px;
+          break-inside: avoid;
+          margin-bottom: 15px;
+        }
+
+        .note.pinned {
+
+        }
+
+        .note-container {
+          padding: 1px 20px 0;
+          background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARYAAAAVBAMAAABxgNxmAAAAGFBMVEX/++r18eDY1MXX08XW0sTV0cPV0cLU0MENij9rAAAAW0lEQVR4Ac3BQRHDMBAEMM1cbL9bBCkDQwgEQzgI5f8KjZX8Pim+jhRDS7G0FMMtRbmlGI4US0uxbCmGR4qppbgcKcqR4rKlGI4U01+KsqWYthSlpSiPFEtLUS8FyQ9uCvw0rgAAAABJRU5ErkJggg==) top center repeat-y;
+          overflow: hidden;
+          word-break: break-word;
+          white-space: pre-wrap;
+          box-sizing: border-box;
+          min-height: 50px;
+          outline: none;
+          width: 100%;
+        }
+
+        .note.pinned .note-container {
+
+        }
+
+        .note-container::selection {
+          background: rgba(0, 120, 215, 0.3);
+          color: inherit;
+        }
+
+        .note-bottom {
+          height: 34px;
+          background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARYAAAAjCAMAAABmU9XXAAAA21BMVEX///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/++r18eDe2svd2crc2Mnb18nb18jY1MXX08XW0sTV0cPV0cLU0MHTz8HSzsDRzb/QzL7PzL7Oy73OyrzNybvMyLrLx7rKxrnJxrjIxbfIxLbIw7bHwrXGwbTFwLPDwLKO3PerAAAAKXRSTlMAAAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJ8OxrOcAAAFySURBVHja7dnBdoMgEAXQ90A3/ZX+/89VmNeFqQ5Iok1PF01nDkcQSMzcA2YB34WIPjghWAYsKQxGESzBEizBEizBEizBEizBEizBEiwRwRIswRIswRIswRIsfzQmJKTEeZ5zJoS1+Etb3Yo7RvEHKuO2nP74cwDorr4qF+a4AQ7GuF1uZetpeyFblo/FTOBbTkxTnnNeR1qKo0mXUZdcf+ikJqF7s9DP4l7XC3MOz2j6dhKiK20TsFqWUqrVaamJ2SbL4Ncy6D2aMrJ5nLAOLOOZHDbtwpyHRgeIA8Z+I7OlFLPKRKaUcua2hRyO3zJPkTwdvPCtfHDb+bn0XXXYYJDVUk02CYKkum0h7+AodDl33Z7Q/spR7zBXtQnqwpwzsv411DT8CgJkZiaRBJkIbgTqEfRbS+Lc9zT9S+touNHa1/SmJTNJJMhV7P6qeIXTe97p6JEkCSL39UPh1TC+iwSufzTk+VZ+9SCg/24Q8YP4BFGOtF1URHqaAAAAAElFTkSuQmCC) bottom center no-repeat;
+          width: 100%;
+          position: relative;
+        }
+
+        .note.pinned .note-bottom {
+
+        }
+
+        .note-date {
+          position: absolute;
+          right: 20px;
+          bottom: 15px;
+          font-size: 12px;
+          color: #999;
+          user-select: none;
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+        }
+
+        /* 置顶图标 */
+        .pin-icon {
+            position: absolute;
+            top: 17px;
+            right: 7px;
+            width: 18px;
+            height: 18px;
+            z-index: 10;
+            background: url('data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAUABQDASIAAhEBAxEB/8QAGQABAQEAAwAAAAAAAAAAAAAAAAQFAgYI/8QAKxAAAQQCAQIDCAMAAAAAAAAAAQIDBBEABSESEwYUMSIkMkFRYXGCYoHB/8QAFwEBAQEBAAAAAAAAAAAAAAAABQQDBv/EACMRAAEEAQMEAwAAAAAAAAAAAAEAAgMRMQQhQVFhgfBxocH/2gAMAwEAAhEDEQA/APVO82jndkpTMECBD9l+QkJLjrhTfabvgGiOaJs0PQ5karZpflBnXbPZxZakhTaNm6l1p5V8o9SQfwR/dVnPdsHyG113eSiSzO862FtlXdQs2kCv5Epvmq54OSQo+xVu4B2EIamO04Xx1pBSspFn4VEA1fJIqhWDySPMnvWs8fvddLDDEITj63oA3XN+aHRd21E0bCAiR2y0uyh1omy2tJIUk/gg4yLwonqhyZo6g3OlOSGgRRCDQSa+4SFftjFIXFzASgNQxrJXNbj3bwrdjros8IMhCg40SWnW1lDjZPr0qHI/355Ejw/HUffps/YtgghqS9bdj6pSAFfteMZhM1plaKzlV6eRw07yDiq7fC2MYxlaOX//2Q==') no-repeat center center;
+            background-size: contain;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .pin-icon:hover {
+            opacity: 1;
+        }
+
+        .context-menu {
+          position: fixed;
+          z-index: 1000;
+          background: white;
+          border: 1px solid #ddd;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+          display: none;
+          width: 150px; 
+        }
+
+        .context-menu-item {
+          padding: 8px 15px;
+          cursor: pointer;
+          font-size: 14px;
+        }
+
+        .context-menu-item:hover {
+          background: #f0f0f0;
+        }
+
+        .empty-message {
+          text-align: center;
+          color: #999;
+          padding: 20px;
+          font-style: italic;
+          column-span: all;
+        }
+
+        /* 侧边栏切换按钮 */
+        .toggle-sidebar {
+          position: fixed;
+          left: 0px;
+          top: 0px;
+          z-index: 100;
+          background: #fff;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          padding: 5px 13px;
+          cursor: pointer;
+          font-size: 14px;
+        }
+
+        .tool-buttons {
+          position: fixed;
+          left: 10px;
+          bottom: 10px;
+          z-index: 100;
+          background: #fff;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          padding: 5px;
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .tool-button {
+          padding: 5px 10px;
+          cursor: pointer;
+          font-size: 14px;
+          border-radius: 3px;
+          border: none;
+          background: #f5f5f5;
+        }
+
+        .tool-button:hover {
+          background: #e0e0e0;
+        }
+
+        .file-input {
+          display: none;
+        }
+
+        /* Dropbox 按钮样式 */
+        .tool-button.dropbox {
+          background: #0061ff;
+          color: white;
+        }
+
+        .tool-button.dropbox:hover {
+          background: #004ac7;
+        }
+
+        /* 状态提示 */
+        .status-toast {
+          position: fixed;
+          bottom: 60px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: rgba(0, 0, 0, 0.7);
+          color: white;
+          padding: 10px 20px;
+          border-radius: 4px;
+          z-index: 1000;
+          opacity: 0;
+          transition: opacity 0.3s;
+        }
+
+        .status-toast.show {
+          opacity: 1;
+        }
+
+        /* 认证模态框 */
+        .auth-modal {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 1001; /* 高于其他元素 */
+          justify-content: center;
+          align-items: center;
+        }
+
+        .auth-modal-content {
+          background: white;
+          padding: 20px;
+          border-radius: 8px;
+          width: 400px;
+          max-width: 90%;
+        }
+
+        .auth-modal h3 {
+          margin-top: 0;
+        }
+
+        .auth-form {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          margin: 15px 0;
+        }
+
+        .auth-form input {
+          padding: 8px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+        }
+
+        .auth-form button {
+          padding: 10px;
+          background: #0061ff;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+
+        .auth-form button:hover {
+          background: #004ac7;
+        }
+
+        .auth-modal-close {
+          background: #f0f0f0;
+          color: #333;
+          padding: 8px 15px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+
+        .auth-modal-close:hover {
+          background: #e0e0e0;
+        }
+
+        /* 授权码输入区域 */
+        .code-input-section {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        .code-input-section h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #0061ff;
+        }
+
+        .code-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        .submit-code {
+            padding: 8px 15px;
+            background: #0061ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .submit-code:hover {
+            background: #004ac7;
+        }
+
+        /* Dropbox 状态指示 */
+        .dropbox-status {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .dropbox-status.connected {
+            display: block;
+            background: #e6f7ee;
+            color: #0a7b4c;
+            border: 1px solid #0a7b4c;
+        }
+
+        .dropbox-status.disconnected {
+            display: block;
+            background: #fef5f5;
+            color: #cf2222;
+            border: 1px solid #cf2222;
+        }
+
+        /* 移动设备样式 */
+        @media (max-width: 800px) {
+          body {
+            flex-direction: column;
+                padding: 10px;
+                background-image: none !important;
+          }
+
+          .sidebar {
+            width: 100%;
+            height: auto;
+            border-right: none;
+            border-bottom: 1px solid #ddd;
+                max-height: 200px;
+                position: fixed;
+                top: 40px;
+                left: 0;
+                z-index: 99;
+                width: 100%;
+                box-sizing: border-box;
+                border-radius: 0;
+          }
+
+          .wrapper {
+            height: auto;
+                margin-top: 50px;
+                padding: 0 10px;
+          }
+
+          .aside {
+            column-width: 100%;
+                column-gap: 0;
+          }
+
+          .sidebar.hidden {
+            transform: translateY(-100%);
+            height: 0;
+                padding: 0;
+          }
+            
+            /* 移动设备上移除笔记背景图片 */
+            .note {
+                padding-top: 15px;
+                background: #fff !important;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                margin-bottom: 15px;
+                width: 100%;
+            }
+            
+            .note-container {
+                background: #fff !important;
+                padding: 15px;
+                min-height: 40px;
+            }
+            
+            .note-bottom {
+                background: #f9f9f9 !important;
+                height: 30px;
+                border-bottom-left-radius: 8px;
+                border-bottom-right-radius: 8px;
+            }
+            
+            .note-date {
+                right: 15px;
+                bottom: 8px;
+            }
+            
+            .tool-buttons {
+                flex-direction: row;
+                bottom: auto;
+                top: 5px;
+                right: 10px;
+                left: auto;
+                padding: 8px;
+            }
+            
+            .toggle-sidebar {
+                top: 5px;
+                left: 10px;
+                z-index: 101;
+            }
+            
+            .pin-icon {
+                top: 8px;
+                right: 8px;
+            }
+            
+            .context-menu {
+                width: 130px;
+                font-size: 16px; /* 增大字体便于触摸 */
+            }
+            
+            .context-menu-item {
+                padding: 12px 15px;
+            }
+            
+            .page-tab {
+                padding: 12px 15px;
+                font-size: 16px;
+            }
+            
+            .add-page {
+                padding: 12px 15px;
+                font-size: 16px;
+            }
+            
+            .auth-modal-content {
+                width: 90%;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+        }
+
+        /* 防止移动设备上的点击延迟 */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="toggle-sidebar" id="toggleSidebar">≡</div>
+    
+    <div class="tool-buttons" id="toolButtons">
+        <button class="tool-button" id="downloadBtn">↓ 本地下载</button>
+        <button class="tool-button" id="uploadBtn">↑ 本地上传</button>
+        <button class="tool-button dropbox" id="dropboxBtn">Dropbox</button>
+        <input type="file" id="fileInput" class="file-input" accept=".json">
+    </div>
+    
+    <div class="status-toast" id="statusToast"></div>
+    
+</div>
+    
+    <div class="sidebar" id="sidebar">
+        <div class="page-tabs" id="pageTabs"></div>
+        <div class="add-page" id="addPage">+ 添加新页签</div>
+    </div>
+
+    <div class="wrapper" id="mainContent">
+        <div class="aside">
+            <div class="empty-message">粘贴内容创建第一个笔记 (Ctrl+V) <br>右键复制或删除</div>
+        </div>
+    </div>
+
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" id="copyNote">复制</div>
+        <div class="context-menu-item" id="pinNote">置顶</div>
+        <div class="context-menu-item" id="deleteNote">删除</div>
+    </div>
+
+    <script>
+// Dropbox应用配置
+let DROPBOX_CONFIG = {
+    clientId: null,
+    redirectUri: (window.location && window.location.origin ? window.location.origin + '/' : 'https://localhost/')
+};
+
+// 全局变量
+let globalPasteHandler = null;
+let currentNote = null;
+let currentPageId = null;
+let notesData = {};
+let isEditingTabName = false;
+let isSidebarVisible = true;
+let dropboxAccessToken = localStorage.getItem('dropbox-access-token');
+let dropboxRefreshToken = localStorage.getItem('dropbox-refresh-token');
+let uploadTimer = null;
+let lastUploadedHash = null;
+
+// 检测是否为移动设备
+function isMobileDevice() {
+    return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // 获取DOM元素
+    const pageTabs = document.getElementById('pageTabs');
+    const addPageBtn = document.getElementById('addPage');
+    const aside = document.querySelector('.aside');
+    const contextMenu = document.getElementById('contextMenu');
+    const copyBtn = document.getElementById('copyNote');
+    const pinBtn = document.getElementById('pinNote');
+    const deleteBtn = document.getElementById('deleteNote');
+    const toggleSidebarBtn = document.getElementById('toggleSidebar');
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('mainContent');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const dropboxBtn = document.getElementById('dropboxBtn');
+    const configBtn = document.getElementById('configBtn');
+    const fileInput = document.getElementById('fileInput');
+    const statusToast = document.getElementById('statusToast');
+
+
+
+
+
+
+
+
+    // 读取环境变量中的 clientId/redirectUri
+    fetch('/api/dropbox-env').then(r => r.json()).then(env => {
+        if (env && env.clientId) DROPBOX_CONFIG.clientId = env.clientId;
+        if (env && env.redirectUri) DROPBOX_CONFIG.redirectUri = env.redirectUri;
+    }).catch(() => {});
+
+
+
+    // 首先检查URL中是否有授权码
+    const urlParams = new URLSearchParams(window.location.search);
+    const authCode = urlParams.get('code');
+    
+    if (authCode) {
+        handleOAuthCallback(authCode);
+    }
+
+    // 加载数据
+    loadData();
+    
+    if (Object.keys(notesData).length === 0) {
+        const firstPageId = 'page-' + Date.now();
+        notesData[firstPageId] = {
+            id: firstPageId,
+            name: '默认页签',
+            notes: []
+        };
+        saveData();
+    }
+    
+    renderAllPageTabs();
+
+    // 设置按钮点击事件
+    //configBtn.addEventListener('click', showAuthModal);
+
+    // Dropbox按钮：未登录发起授权；已登录直接上传
+    dropboxBtn.addEventListener('click', function() {
+        if (!dropboxAccessToken) {
+            authenticateDropbox();
+        } else {
+            uploadToDropbox();
+        }
+    });
+
+    // 显示状态提示
+    function showStatus(message, duration = 3000) {
+        statusToast.textContent = message;
+        statusToast.classList.add('show');
+        
+        setTimeout(() => {
+            statusToast.classList.remove('show');
+        }, duration);
+    }
+
+    function showAuthModal() {}
+
+    function hideAuthModal() {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // 加载数据时同时加载侧边栏状态
+    function loadData() {
+        const savedData = localStorage.getItem('smart-notes-data');
+        if (savedData) {
+            notesData = JSON.parse(savedData);
+        }
+        
+        // 加载侧边栏状态
+        const sidebarState = localStorage.getItem('smart-notes-sidebar-state');
+        if (sidebarState === 'hidden') {
+            isSidebarVisible = false;
+            sidebar.classList.add('hidden');
+            mainContent.style.marginLeft = '0px';
+            toggleSidebarBtn.textContent = '›';
+        }
+        
+        // 加载当前页签
+        const savedPageId = localStorage.getItem('smart-notes-current-page');
+        if (savedPageId && notesData[savedPageId]) {
+            currentPageId = savedPageId;
+        }
+    }
+
+    // 切换侧边栏显示/隐藏
+    toggleSidebarBtn.addEventListener('click', function() {
+        isSidebarVisible = !isSidebarVisible;
+        if (isSidebarVisible) {
+            sidebar.classList.remove('hidden');
+            mainContent.style.marginLeft = '0';
+            toggleSidebarBtn.textContent = '≡';
+            localStorage.setItem('smart-notes-sidebar-state', 'visible');
+        } else {
+            sidebar.classList.add('hidden');
+            mainContent.style.marginLeft = '0px';
+            toggleSidebarBtn.textContent = '›';
+            localStorage.setItem('smart-notes-sidebar-state', 'hidden');
+        }
+    });
+
+    // 下载按钮点击事件
+    downloadBtn.addEventListener('click', function() {
+        const currentDate = formatDate(new Date(), 'YYYY年MM月DD日');
+        const fileName = `笔记-${currentDate}.json`;
+        const dataStr = JSON.stringify(notesData, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        
+        const downloadLink = document.createElement('a');
+        downloadLink.href = URL.createObjectURL(dataBlob);
+        downloadLink.download = fileName;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    });
+
+    // 上传按钮点击事件
+    uploadBtn.addEventListener('click', function() {
+        fileInput.click();
+    });
+
+    // Dropbox认证
+    function authenticateDropbox() {
+        // 生成CSRF令牌
+        const csrfToken = Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('dropbox-csrf-token', csrfToken);
+        
+        // 构建认证URL - 使用授权码模式
+        const authUrl = 'https://www.dropbox.com/oauth2/authorize' +
+            '?client_id=' + DROPBOX_CONFIG.clientId +
+            '&redirect_uri=' + encodeURIComponent(DROPBOX_CONFIG.redirectUri) +
+            '&response_type=code' +
+            '&state=' + csrfToken +
+            '&token_access_type=offline';
+        
+        // 打开认证窗口
+        const authWindow = window.open(authUrl, '_blank', 'width=600,height=600');
+        
+        showStatus('请在新窗口中完成Dropbox认证');
+    }
+
+    // 处理 OAuth 回调：用后端交换令牌并自动下载
+    function handleOAuthCallback(code) {
+        showStatus('正在完成授权...', 5000);
+        fetch('/api/dropbox-token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                code: code,
+                redirectUri: DROPBOX_CONFIG.redirectUri
+            })
+        })
+        .then(async resp => {
+            if (!resp.ok) throw new Error(await resp.text());
+            return resp.json();
+        })
+        .then(data => {
+            dropboxAccessToken = data.access_token;
+            dropboxRefreshToken = data.refresh_token || null;
+            localStorage.setItem('dropbox-access-token', dropboxAccessToken);
+            if (dropboxRefreshToken) localStorage.setItem('dropbox-refresh-token', dropboxRefreshToken);
+            showStatus('Dropbox认证成功，正在同步...');
+            downloadFromDropboxAction();
+        })
+        .catch(err => {
+            console.error('OAuth 完成失败:', err);
+            showStatus('授权失败，请重试');
+        })
+        .finally(() => {
+            const newUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+        });
+    }
+
+    // 使用授权码交换访问令牌
+    async function exchangeCodeForToken(code) {
+        showStatus('正在获取访问令牌...', 5000);
+        
+        try {
+            const response = await fetch('https://api.dropboxapi.com/oauth2/token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    code: code,
+                    grant_type: 'authorization_code',
+                    client_id: DROPBOX_CONFIG.clientId,
+                    client_secret: DROPBOX_CONFIG.clientSecret,
+                    redirect_uri: DROPBOX_CONFIG.redirectUri
+                })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                dropboxAccessToken = data.access_token;
+                dropboxRefreshToken = data.refresh_token;
+                
+                localStorage.setItem('dropbox-access-token', dropboxAccessToken);
+                localStorage.setItem('dropbox-refresh-token', dropboxRefreshToken);
+                
+                showStatus('Dropbox认证成功！');
+                hideAuthModal();
+            } else {
+                const error = await response.text();
+                console.error('Dropbox令牌交换错误:', error);
+                showStatus('认证失败，请检查配置信息');
+            }
+        } catch (error) {
+            console.error('Dropbox令牌交换异常:', error);
+            showStatus('网络错误，请重试');
+        }
+    }
+
+    // 上传到Dropbox
+    async function uploadToDropbox() {
+        if (!dropboxAccessToken) {
+            showStatus('请先进行Dropbox认证');
+            return;
+        }
+        
+        try {
+            showStatus('正在上传到Dropbox...', 5000);
+            
+            const fileName = `NoteIO.json`;
+            const dataStr = JSON.stringify(notesData, null, 2);
+            
+            const response = await fetch('https://content.dropboxapi.com/2/files/upload', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + dropboxAccessToken,
+                    'Content-Type': 'application/octet-stream',
+                    'Dropbox-API-Arg': JSON.stringify({
+                        path: '/' + fileName,
+                        mode: 'overwrite',
+                        autorename: true,
+                        mute: false
+                    })
+                },
+                body: dataStr
+            });
+            
+            if (response.ok) {
+                showStatus('已成功上传到Dropbox！');
+                try { lastUploadedHash = JSON.stringify(notesData); } catch (e) {}
+            } else {
+                const error = await response.json();
+                console.error('Dropbox上传错误:', error);
+                showStatus('上传失败: ' + (error.error_summary || '未知错误'));
+                
+                if (response.status === 401) {
+                    localStorage.removeItem('dropbox-access-token');
+                    dropboxAccessToken = null;
+                }
+            }
+        } catch (error) {
+            console.error('Dropbox上传异常:', error);
+            showStatus('上传失败: ' + error.message);
+        }
+    }
+
+    // 从Dropbox下载
+    async function downloadFromDropboxAction() {
+        if (!dropboxAccessToken) {
+            showStatus('请先进行Dropbox认证');
+            return;
+        }
+        
+        try {
+            showStatus('正在从Dropbox下载...', 5000);
+            
+            const fileName = `NoteIO.json`;
+            
+            const response = await fetch('https://content.dropboxapi.com/2/files/download', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + dropboxAccessToken,
+                    'Dropbox-API-Arg': JSON.stringify({
+                        path: '/' + fileName
+                    })
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                notesData = data;
+                saveData();
+                renderAllPageTabs();
+                showStatus('已成功从Dropbox下载！');
+            } else {
+                if (response.status === 409) {
+                    showStatus('Dropbox上未找到NoteIO.json文件');
+                } else {
+                    const error = await response.json();
+                    console.error('Dropbox下载错误:', error);
+                    showStatus('下载失败: ' + (error.error_summary || '未知错误'));
+                    
+                    if (response.status === 401) {
+                        localStorage.removeItem('dropbox-access-token');
+                        dropboxAccessToken = null;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Dropbox下载异常:', error);
+            showStatus('下载失败: ' + error.message);
+        }
+    }
+
+    // 文件上传处理
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                if (confirm('确定要导入此文件吗？这将覆盖当前所有笔记。')) {
+                    notesData = importedData;
+                    saveData();
+                    renderAllPageTabs();
+                    
+                    fileInput.value = '';
+                }
+            } catch (error) {
+                alert('文件格式不正确，导入失败');
+                console.error(error);
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    // 格式化日期
+    function formatDate(date, format) {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        
+        return format
+            .replace('YYYY', year)
+            .replace('MM', month)
+            .replace('DD', day);
+    }
+    
+    addPageBtn.addEventListener('click', function() {
+        const pageId = 'page-' + Date.now();
+        const pageName = '新页签';
+        
+        notesData[pageId] = {
+            id: pageId,
+            name: pageName,
+            notes: []
+        };
+        
+        saveData();
+        renderAllPageTabs();
+        switchPage(pageId);
+        
+        const newTab = document.querySelector(`.page-tab[data-id="${pageId}"]`);
+        if (newTab) {
+            editPageTabName(newTab);
+        }
+    });
+    
+    function renderAllPageTabs() {
+        pageTabs.innerHTML = '';
+        for (const pageId in notesData) {
+            if (notesData.hasOwnProperty(pageId)) {
+                addPageTabToDOM(pageId, notesData[pageId].name);
+            }
+        }
+        
+        // 优先使用保存的当前页签，否则使用第一个页签
+        if (currentPageId && notesData[currentPageId]) {
+            switchPage(currentPageId);
+        } else if (Object.keys(notesData).length > 0) {
+            const firstPageId = Object.keys(notesData)[0];
+            switchPage(firstPageId);
+        }
+    }
+    
+    function addPageTabToDOM(pageId, pageName) {
+        const pageTab = document.createElement('div');
+        pageTab.className = 'page-tab';
+        pageTab.dataset.id = pageId;
+        
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'page-tab-name';
+        nameSpan.textContent = pageName;
+        
+        const deleteBtn = document.createElement('span');
+        deleteBtn.className = 'page-tab-delete';
+        deleteBtn.innerHTML = '×';
+        deleteBtn.title = '删除页签';
+        
+        pageTab.appendChild(nameSpan);
+        pageTab.appendChild(deleteBtn);
+        
+        // 点击页签切换 - 添加触摸事件支持
+        pageTab.addEventListener('click', function(e) {
+            if (isEditingTabName || e.target === deleteBtn) return;
+
+            if (e.detail === 2 || isMobileDevice()) {
+                // 双击或移动设备上的单击
+                editPageTabName(pageTab);
+            } else if (e.detail === 1) {
+                // 单击
+                switchPage(pageId);
+            }
+        });
+        
+        // 双击名称编辑（修改为双击）
+        nameSpan.addEventListener('dblclick', function(e) {
+            if (isEditingTabName) return;
+            e.stopPropagation();
+            editPageTabName(pageTab);
+        });
+        
+        // 移动设备上的长按事件
+        let pressTimer;
+        nameSpan.addEventListener('touchstart', function(e) {
+            if (isEditingTabName) return;
+            e.stopPropagation();
+            pressTimer = setTimeout(function() {
+                editPageTabName(pageTab);
+            }, 500); // 长按500毫秒
+        });
+        
+        nameSpan.addEventListener('touchend', function(e) {
+            e.stopPropagation();
+            clearTimeout(pressTimer);
+        });
+        
+        // 删除页签
+        deleteBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            deletePage(pageId);
+        });
+        
+        pageTabs.appendChild(pageTab);
+        return pageTab;
+    }
+    
+    function editPageTabName(pageTab) {
+        if (isEditingTabName) return;
+        isEditingTabName = true;
+        
+        const pageId = pageTab.dataset.id;
+        const nameSpan = pageTab.querySelector('.page-tab-name');
+        const oldName = nameSpan.textContent;
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'page-tab-input';
+        input.value = oldName;
+        
+        nameSpan.style.display = 'none';
+        pageTab.insertBefore(input, nameSpan);
+        input.focus();
+        
+        // 移动设备上自动弹出键盘
+        if (isMobileDevice()) {
+            input.setAttribute('inputmode', 'text');
+        }
+        
+        function saveName() {
+            isEditingTabName = false;
+            const newName = input.value.trim() || '未命名页签';
+            notesData[pageId].name = newName;
+            saveData();
+            
+            nameSpan.textContent = newName;
+            nameSpan.style.display = '';
+            pageTab.removeChild(input);
+        }
+        
+        function cancelEdit() {
+            isEditingTabName = false;
+            nameSpan.style.display = '';
+            pageTab.removeChild(input);
+        }
+        
+        input.addEventListener('blur', saveName);
+        input.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                saveName();
+            } else if (e.key === 'Escape') {
+                cancelEdit();
+            }
+        });
+    }
+    
+    function deletePage(pageId) {
+        if (Object.keys(notesData).length <= 1) {
+            alert('至少需要保留一个页签');
+            return;
+        }
+        
+        if (confirm('确定要删除这个页签及其所有内容吗？')) {
+            delete notesData[pageId];
+            saveData();
+            
+            if (currentPageId === pageId) {
+                // 切换到其他页签
+                const remainingPageId = Object.keys(notesData)[0];
+                switchPage(remainingPageId);
+            }
+            
+            renderAllPageTabs();
+        }
+    }
+    
+    function switchPage(pageId) {
+        document.querySelectorAll('.page-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        const activeTab = document.querySelector(`.page-tab[data-id="${pageId}"]`);
+        if (activeTab) activeTab.classList.add('active');
+        
+        currentPageId = pageId;
+        // 保存当前选中的页签
+        localStorage.setItem('smart-notes-current-page', currentPageId);
+        renderNotes();
+    }
+    
+    function renderNotes() {
+        aside.innerHTML = '';
+        
+        const currentPage = notesData[currentPageId];
+        if (!currentPage || currentPage.notes.length === 0) {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.className = 'empty-message';
+            emptyMsg.textContent = '粘贴内容创建第一个笔记 (Ctrl+V) 支持右键复制或删除 纯本地支持下载与上传';
+            aside.appendChild(emptyMsg);
+            return;
+        }
+        
+        // 先渲染置顶笔记
+        const pinnedNotes = currentPage.notes.filter(note => note.pinned);
+        pinnedNotes.forEach(noteData => {
+            createNote(noteData.content, noteData.id, noteData.date, noteData.pinned);
+        });
+        
+        // 再渲染普通笔记
+        const normalNotes = currentPage.notes.filter(note => !note.pinned);
+        normalNotes.forEach(noteData => {
+            createNote(noteData.content, noteData.id, noteData.date, noteData.pinned);
+        });
+    }
+    
+    // 全局粘贴事件处理
+    function handlePaste(e) {
+        // 检查是否有活动编辑元素
+        const activeElement = document.activeElement;
+        if (activeElement && activeElement.classList.contains('note-container')) {
+            // 如果光标在笔记编辑区内，允许默认粘贴行为
+            const noteId = activeElement.closest('.note').dataset.id;
+            
+            // 使用setTimeout等待粘贴内容插入完成
+            setTimeout(() => {
+                updateNoteContent(noteId, getNoteContent(activeElement));
+            }, 0);
+            
+            return; // 不阻止默认行为
+        }
+        
+        // 如果没有活动编辑元素，则创建新笔记
+        e.preventDefault();
+        let text = (e.clipboardData || window.clipboardData).getData('text/plain');
+        text = text.trim();
+        
+        if (text) {
+            const emptyMsg = document.querySelector('.empty-message');
+            if (emptyMsg) emptyMsg.remove();
+            createNote(text);
+        }
+    }
+    
+    // 保存全局粘贴处理函数引用
+    document.pasteHandler = handlePaste;
+    document.addEventListener('paste', document.pasteHandler);
+    
+    function createNote(content = '', noteId = null, noteDate = null, pinned = false) {
+        noteId = noteId || 'note-' + Date.now();
+        const currentDate = noteDate || formatDate(new Date(), 'YYYY年MM月DD日');
+        
+        const newNote = document.createElement('div');
+        newNote.className = 'note' + (pinned ? ' pinned' : '');
+        newNote.dataset.id = noteId;
+        newNote.innerHTML = `
+            <div class="note-container" contenteditable="true">${formatContentForDisplay(content)}</div>
+            <div class="note-bottom">
+                <span class="note-date">${currentDate}</span>
+            </div>
+            ${pinned ? '<div class="pin-icon" title="取消置顶"></div>' : ''}
+        `;
+        
+        aside.appendChild(newNote);
+        const container = newNote.querySelector('.note-container');
+        focusNote(container);
+        
+        container.addEventListener('input', function() {
+            updateNoteContent(noteId, getNoteContent(container));
+        });
+        
+        // 点击置顶图标取消置顶
+        if (pinned) {
+            const pinIcon = newNote.querySelector('.pin-icon');
+            pinIcon.addEventListener('click', function(e) {
+                e.stopPropagation();
+                togglePinNote(noteId);
+            });
+            
+            // 移动设备上的触摸事件
+            pinIcon.addEventListener('touchstart', function(e) {
+                e.stopPropagation();
+                togglePinNote(noteId);
+            });
+        }
+        
+        // 右键菜单事件
+        newNote.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            currentNote = newNote;
+            showContextMenu(e.clientX, e.clientY);
+        });
+        
+        // 移动设备上的长按事件替代右键
+        let touchTimer;
+        newNote.addEventListener('touchstart', function(e) {
+            currentNote = newNote;
+            touchTimer = setTimeout(function() {
+                showContextMenu(e.touches[0].clientX, e.touches[0].clientY);
+            }, 500); // 长按500毫秒显示菜单
+        });
+        
+        newNote.addEventListener('touchend', function() {
+            clearTimeout(touchTimer);
+        });
+        
+        newNote.addEventListener('touchmove', function() {
+            clearTimeout(touchTimer);
+        });
+        
+        if (!noteExistsInData(noteId)) {
+            notesData[currentPageId].notes.push({
+                id: noteId,
+                content: content,
+                date: currentDate,
+                pinned: pinned
+            });
+            saveData();
+        }
+        
+        return newNote;
+    }
+    
+    function noteExistsInData(noteId) {
+        return notesData[currentPageId].notes.some(note => note.id === noteId);
+    }
+    
+    function updateNoteContent(noteId, content) {
+        const noteIndex = notesData[currentPageId].notes.findIndex(note => note.id === noteId);
+        if (noteIndex !== -1) {
+            notesData[currentPageId].notes[noteIndex].content = content;
+            saveData();
+        }
+    }
+    
+    function formatContentForDisplay(content) {
+        return content
+    }
+    
+    function getNoteContent(container) {
+        let html = container.innerHTML;
+        // 处理换行和段落
+        html = html.replace(/<br\s*\/?>/gi, '\n');
+        html = html.replace(/<\/div>/gi, '\n');
+        html = html.replace(/<\/p>/gi, '\n');
+        html = html.replace(/<p>/gi, '');
+        // 移除全角空格缩进
+        html = html.replace(/　　/g, '');
+        
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        let text = div.textContent || div.innerText || '';
+        // 合并多个换行
+        text = text.replace(/\n+/g, '\n');
+        return text.trim();
+    }
+    
+    function focusNote(container) {
+        setTimeout(() => {
+            container.focus();
+            const range = document.createRange();
+            range.selectNodeContents(container);
+            range.collapse(false);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }, 0);
+    }
+    
+    function showContextMenu(x, y) {
+        contextMenu.style.display = 'block';
+        contextMenu.style.left = x + 'px';
+        contextMenu.style.top = y + 'px';
+        
+        // 根据当前笔记的置顶状态更新菜单文本
+        const noteId = currentNote.dataset.id;
+        const noteIndex = notesData[currentPageId].notes.findIndex(note => note.id === noteId);
+        const isPinned = notesData[currentPageId].notes[noteIndex].pinned;
+        
+        pinBtn.textContent = isPinned ? '取消置顶' : '置顶';
+    }
+    
+    function hideContextMenu() {
+        contextMenu.style.display = 'none';
+    }
+    
+    copyBtn.addEventListener('click', function() {
+        if (currentNote) {
+            const content = getNoteContent(currentNote.querySelector('.note-container'));
+            navigator.clipboard.writeText(content);
+            hideContextMenu();
+        }
+    });
+    
+    // 置顶/取消置顶功能
+    pinBtn.addEventListener('click', function() {
+        if (currentNote) {
+            const noteId = currentNote.dataset.id;
+            togglePinNote(noteId);
+            hideContextMenu();
+        }
+    });
+    
+    function togglePinNote(noteId) {
+        const noteIndex = notesData[currentPageId].notes.findIndex(note => note.id === noteId);
+        if (noteIndex !== -1) {
+            // 切换置顶状态
+            notesData[currentPageId].notes[noteIndex].pinned = !notesData[currentPageId].notes[noteIndex].pinned;
+            saveData();
+            renderNotes();
+        }
+    }
+    
+    deleteBtn.addEventListener('click', function() {
+        if (currentNote) {
+            const noteId = currentNote.dataset.id;
+            currentNote.remove();
+            
+            const noteIndex = notesData[currentPageId].notes.findIndex(note => note.id === noteId);
+            if (noteIndex !== -1) {
+                notesData[currentPageId].notes.splice(noteIndex, 1);
+                saveData();
+            }
+            
+            hideContextMenu();
+            
+            if (document.querySelectorAll('.note').length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.className = 'empty-message';
+                emptyMsg.textContent = '粘贴内容创建第一个笔记 (Ctrl+V) 支持右键复制或删除 纯本地支持下载与上传';
+                aside.appendChild(emptyMsg);
+            }
+        }
+    });
+    
+    document.addEventListener('click', hideContextMenu);
+    document.addEventListener('touchstart', hideContextMenu);
+
+    // 防抖与差异检测的自动上传
+    function scheduleDropboxUpload() {
+        if (!dropboxAccessToken) return;
+        clearTimeout(uploadTimer);
+        uploadTimer = setTimeout(() => {
+            try {
+                const current = JSON.stringify(notesData);
+                if (lastUploadedHash === current) return;
+            } catch (e) {}
+            uploadToDropbox();
+        }, 1200);
+    }
+    
+    function saveData() {
+        localStorage.setItem('smart-notes-data', JSON.stringify(notesData));
+        scheduleDropboxUpload();
+    }
+});
+    </script>
+    
+        <style>
+        .corner-links {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            display: flex;
+            align-items: center;
+            z-index: 9999;
+        }
+        .corner-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            color: #212529;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .corner-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        .corner-link img,
+        .corner-link svg {
+            width: 22px;
+            height: 22px;
+        }
+        .corner-link .label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+    </style>
+    <div class="corner-links" aria-label="页面固定链接">
+        <a class="corner-link" href="https://github.com/IIIStudio/NoteIO" target="_blank" rel="noopener noreferrer" aria-label="前往 GitHub 仓库">
+            <!-- 内联 GitHub 图标，避免外部资源依赖 -->
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#24292F" d="M12 .5a12 12 0 0 0-3.79 23.41c.6.11.82-.26.82-.58v-2.02c-3.35.73-4.06-1.61-4.06-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.74.08-.74 1.2.09 1.83 1.23 1.83 1.23 1.07 1.83 2.8 1.3 3.49.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.51.12-3.15 0 0 1.01-.32 3.3 1.23.96-.27 1.99-.4 3.01-.4s2.05.14 3.01.4c2.29-1.55 3.3-1.23 3.3-1.23.66 1.64.25 2.85.12 3.15.77.84 1.24 1.91 1.24 3.22 0 4.61-2.8 5.63-5.47 5.93.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58A12 12 0 0 0 12 .5Z"/>
+            </svg>
+            <span class="label">NoteIO</span>
+        </a>
+        <a class="corner-link" href="https://cnb.cool/IIIStudio/HTML/NoteIO/" target="_blank" rel="noopener noreferrer" aria-label="前往 NoteIO 文档页面">
+            <img src="https://docs.cnb.cool/images/logo/svg/LogoColorfulIcon.svg" alt="CNB Logo">
+        </a>
+    </div>
+</body>
+</html>
