@@ -8,33 +8,28 @@
 
 那么就可以用它。
 
-## 更新日志
+## 更新日子
 ### 2025年10月6日
 支持vercel安装 支持自动上传到dropbox。
 
 Root Directory：**选择目录为vercel**
 
 添加变量 Environment Variables
-
+```
 DROPBOX_CLIENT_ID=App key
-
 DROPBOX_CLIENT_SECRET=App secret
-
+```
 其他都是默认
 
 App key与App secret需要去https://www.dropbox.com/developers/apps/ 申请
 
-OAuth 2
-Redirect URIs
+OAuth 2 Redirect URIs：写入你的网站地址。
 
-写入你的网站地址。
-
-Permissions 需要开放权限为 （记得报错）
-
+Permissions 需要开放权限为 （勾选下面的，记得保存）
+```
 files.content.write
-
 files.content.read
-
+```
 ## 使用方式
 
 使用Ctrl+v粘贴内容，就这么简单
@@ -45,7 +40,7 @@ files.content.read
 
 ## 游览器插件
 
-插件在NoteIO Edge Extension文件夹中
+插件在NoteIO Edge Extension 文件夹中
 
 1. 打开edge://extensions/
 2. 开启开发人员模式（在左边）
