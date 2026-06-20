@@ -628,10 +628,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const statusToast = document.getElementById('statusToast');
 
     // 读取环境变量中的 clientId/redirectUri
+    let dropboxConfigLoaded = false;
     fetch('/api/dropbox-env').then(r => r.json()).then(env => {
         if (env && env.clientId) DROPBOX_CONFIG.clientId = env.clientId;
         if (env && env.redirectUri) DROPBOX_CONFIG.redirectUri = env.redirectUri;
-    }).catch(() => {});
+        dropboxConfigLoaded = true;
+    }).catch(() => {
+        dropboxConfigLoaded = true;
+    });
     // 监听弹窗回传的 OAuth code
     window.addEventListener('message', function(e) {
         try {
@@ -680,6 +684,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Dropbox按钮：未登录发起授权；已登录直接上传
     dropboxBtn.addEventListener('click', function() {
         if (!dropboxAccessToken) {
+            if (!DROPBOX_CONFIG.clientId) {
+                showStatus('Dropbox 配置加载中，请稍后再试...');
+                return;
+            }
             authenticateDropbox();
         } else {
             uploadToDropbox();
@@ -761,6 +769,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Dropbox认证
     function authenticateDropbox() {
+        if (!DROPBOX_CONFIG.clientId) {
+            showStatus('Dropbox 配置未加载，请刷新页面重试');
+            return;
+        }
+        
         // 生成CSRF令牌
         const csrfToken = Math.random().toString(36).substring(2, 15);
         localStorage.setItem('dropbox-csrf-token', csrfToken);
@@ -774,7 +787,12 @@ document.addEventListener('DOMContentLoaded', function() {
             '&token_access_type=offline';
         
         // 打开认证窗口
-        const authWindow = window.open(authUrl, '_blank', 'width=600,height=600');
+        const authWindow = window.open(authUrl, 'dropbox-auth', 'width=600,height=600');
+        
+        if (!authWindow || authWindow.closed || typeof authWindow.closed === 'undefined') {
+            showStatus('弹窗被浏览器拦截，请允许弹窗后重试');
+            return;
+        }
         
         showStatus('请在新窗口中完成Dropbox认证');
     }
